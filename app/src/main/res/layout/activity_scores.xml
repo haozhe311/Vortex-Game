@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/cyber_bg">
+
+    <!-- Themed Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TOP 25 SCORES"
+        android:gravity="center"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:typeface="monospace"
+        android:textColor="@color/cyber_cyan"
+        android:layout_marginBottom="24dp"
+
+        android:shadowColor="@color/cyber_pink"
+        android:shadowDx="8"
+        android:shadowDy="8"
+        android:shadowRadius="0.1"/>
+
+    <!-- Themed List -->
+    <ListView
+        android:id="@+id/listViewScores"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@color/cyber_cyan"
+        android:dividerHeight="1dp"/>
+
+</LinearLayout>

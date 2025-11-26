@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:background="@color/cyber_bg">
+
+    <!-- THE 3D TITLE -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="VORTEX"
+        android:textSize="60sp"
+        android:textStyle="bold"
+        android:typeface="monospace"
+        android:letterSpacing="0.1"
+
+        android:textColor="@color/cyber_cyan"
+
+        android:shadowColor="@color/cyber_pink"
+        android:shadowDx="15"
+        android:shadowDy="15"
+        android:shadowRadius="0.1"
+
+        android:layout_marginBottom="60dp"/>
+
+    <!-- Styled Buttons -->
+    <Button
+        android:id="@+id/btnStartGame"
+        android:layout_width="240dp"
+        android:layout_height="60dp"
+        android:text="Start Game"
+        android:textSize="18sp"
+        android:typeface="monospace"
+        android:backgroundTint="@color/cyber_inactive"
+        android:textColor="@color/cyber_cyan"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/btnHelp"
+        android:layout_width="240dp"
+        android:layout_height="60dp"
+        android:backgroundTint="@color/cyber_inactive"
+        android:text="Help"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:typeface="monospace"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/btnHighScores"
+        android:layout_width="240dp"
+        android:layout_height="60dp"
+        android:text="Top 25 Scores"
+        android:textSize="18sp"
+        android:typeface="monospace"
+        android:backgroundTint="@color/cyber_inactive"
+        android:textColor="@color/white"/>
+
+</LinearLayout>
