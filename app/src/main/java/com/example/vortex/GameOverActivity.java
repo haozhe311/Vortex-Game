@@ -10,11 +10,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
- * Displayed when a level is completed (timer runs out).
- * This activity:
- * 1. Shows the score summary.
- * 2. Determines if the user can proceed to the next level.
- * 3. Checks if the final score qualifies for the Top 25 leaderboard.
+ * Handles the logic when a level is completed or the game ends.
+ * This activity displays the final score and determines if the user
+ * should be prompted to enter their name for the leaderboard.
  */
 public class GameOverActivity extends AppCompatActivity {
 
@@ -26,24 +24,25 @@ public class GameOverActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_over);
 
-        // Retrieve score and level data from the ended game session.
+        // Retrieve data passed from GameActivity
         finishedLevel = getIntent().getIntExtra("FINISHED_LEVEL", 1);
         int levelScore = getIntent().getIntExtra("LEVEL_SCORE", 0);
         totalScore = getIntent().getIntExtra("TOTAL_SCORE", 0);
 
+        // Bind UI Elements
         TextView tvTitle = findViewById(R.id.tvGameOverTitle);
         TextView tvSub = findViewById(R.id.tvGameOverSub);
-
-        tvTitle.setText("LEVEL " + finishedLevel + " COMPLETE");
-        tvSub.setText("TOTAL SCORE: " + totalScore + "\n(+" + levelScore + " this level)");
-
         Button btnEndGame = findViewById(R.id.btnEndGame);
         Button btnNext = findViewById(R.id.btnNextLevel);
 
+        // Update Text
+        tvTitle.setText("LEVEL " + finishedLevel + " COMPLETE");
+        tvSub.setText("TOTAL SCORE: " + totalScore + "\n(+" + levelScore + " this level)");
+
+        // "End Game" Button: Checks score qualification before exiting
         btnEndGame.setOnClickListener(v -> checkHighScoreAndFinish());
 
-        // Logic to determine if "Next Level" button should be shown.
-        // The game ends after Level 4.
+        // "Next Level" Button: Only visible if not at the final level (Level 4)
         if (finishedLevel >= 4) {
             btnNext.setVisibility(View.GONE);
             btnEndGame.setText("FINISH GAME");
@@ -59,8 +58,8 @@ public class GameOverActivity extends AppCompatActivity {
     }
 
     /**
-     * Checks the database to see if the user's score qualifies for the Hall of Fame.
-     * If yes, prompts for a name; otherwise, returns to Main Menu.
+     * Checks if the user's score qualifies for the Hall of Fame.
+     * If it qualifies, show the dialog. If not, go directly to Main Menu.
      */
     private void checkHighScoreAndFinish() {
         DBHelper db = new DBHelper(this);
@@ -68,14 +67,15 @@ public class GameOverActivity extends AppCompatActivity {
         if (db.isTop25(totalScore, finishedLevel)) {
             showSaveDialog(db);
         } else {
+            // Score is too low or list is full; return to menu immediately.
             goToMainMenu();
         }
     }
 
     /**
-     * Displays a dialog allowing the winner to enter their name.
+     * Shows a dialog for the user to enter their name.
      *
-     * @param db The database helper instance to perform the insertion.
+     * @param db The database helper instance.
      */
     private void showSaveDialog(DBHelper db) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -84,7 +84,7 @@ public class GameOverActivity extends AppCompatActivity {
 
         final EditText input = new EditText(this);
         builder.setView(input);
-        builder.setCancelable(false);
+        builder.setCancelable(false); // Prevents clicking outside to close
 
         builder.setPositiveButton("SUBMIT", (dialog, which) -> {
             String name = input.getText().toString();
@@ -93,9 +93,13 @@ public class GameOverActivity extends AppCompatActivity {
             db.addScore(name, totalScore, finishedLevel);
             goToMainMenu();
         });
+
         builder.show();
     }
 
+    /**
+     * Navigates back to the Main Menu, clearing the activity stack.
+     */
     private void goToMainMenu() {
         Intent intent = new Intent(GameOverActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
