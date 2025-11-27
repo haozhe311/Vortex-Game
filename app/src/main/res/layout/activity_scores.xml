@@ -7,6 +7,7 @@
     android:background="@color/cyber_bg">
 
     <!-- Themed Title -->
+    <!-- ADDED: layout_marginTop="32dp" to prevent status bar overlap -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,12 +17,26 @@
         android:textStyle="bold"
         android:typeface="monospace"
         android:textColor="@color/cyber_cyan"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="32dp"
 
         android:shadowColor="@color/cyber_pink"
         android:shadowDx="8"
         android:shadowDy="8"
         android:shadowRadius="0.1"/>
+
+    <!-- Subtitle for Level (e.g. "LEVEL 2") -->
+    <TextView
+        android:id="@+id/tvLevelSub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ALL LEVELS"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="monospace"
+        android:textColor="@color/cyber_text"
+        android:layout_marginBottom="24dp"/>
 
     <!-- Themed List -->
     <ListView

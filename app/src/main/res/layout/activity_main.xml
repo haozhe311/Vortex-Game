@@ -28,11 +28,13 @@
         android:layout_marginBottom="60dp"/>
 
     <!-- Styled Buttons -->
+
+    <!-- 1. CHANGED: Text to "Start" -->
     <Button
         android:id="@+id/btnStartGame"
         android:layout_width="240dp"
         android:layout_height="60dp"
-        android:text="Start Game"
+        android:text="Start"
         android:textSize="18sp"
         android:typeface="monospace"
         android:backgroundTint="@color/cyber_inactive"
@@ -50,11 +52,12 @@
         android:typeface="monospace"
         android:layout_marginBottom="24dp"/>
 
+    <!-- 2. CHANGED: Text to "Leaderboard" -->
     <Button
         android:id="@+id/btnHighScores"
         android:layout_width="240dp"
         android:layout_height="60dp"
-        android:text="Top 25 Scores"
+        android:text="Leaderboard"
         android:textSize="18sp"
         android:typeface="monospace"
         android:backgroundTint="@color/cyber_inactive"
