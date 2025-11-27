@@ -8,7 +8,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 
 /**
- * Purpose: Manages SQLite database for scores, including the Level played.
+ * Database Helper for managing persistent storage of game scores.
+ * This class handles SQLite creation, upgrades, and specific queries regarding
+ * the Top 25 leaderboard requirement.
  */
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -16,6 +18,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 2;
     private static final String TABLE_SCORES = "scores";
 
+    // Column Constants
     private static final String KEY_ID = "id";
     private static final String KEY_NAME = "name";
     private static final String KEY_SCORE = "score";
@@ -37,12 +40,20 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Drop older table if exists and re-create.
         if (oldVersion < 2) {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SCORES);
             onCreate(db);
         }
     }
 
+    /**
+     * Inserts a new score entry into the database.
+     *
+     * @param name  The player's name.
+     * @param score The total score achieved.
+     * @param level The level reached or completed.
+     */
     public void addScore(String name, int score, int level) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -53,37 +64,40 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    /**
+     * Retrieves the top 25 scores, optionally filtered by level.
+     *
+     * @param levelFilter The specific level to filter by, or -1 for all levels.
+     * @return A list of formatted strings representing the leaderboard rows.
+     */
     public ArrayList<String> getTop25Scores(int levelFilter) {
         ArrayList<String> scoreList = new ArrayList<>();
         String selectQuery;
 
         if (levelFilter == -1) {
-            // Get All
+            // Fetch top 25 across all levels
             selectQuery = "SELECT * FROM " + TABLE_SCORES + " ORDER BY " + KEY_SCORE + " DESC LIMIT 25";
         } else {
-            // Filter by Level
+            // Fetch top 25 for a specific level
             selectQuery = "SELECT * FROM " + TABLE_SCORES + " WHERE " + KEY_LEVEL + "=" + levelFilter + " ORDER BY " + KEY_SCORE + " DESC LIMIT 25";
         }
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        int rank = 1; // Counter for ranking
+        int rank = 1;
         if (cursor.moveToFirst()) {
             do {
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(KEY_NAME));
                 int score = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_SCORE));
                 int lvl = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_LEVEL));
 
-                // UPDATED FORMAT: Use Rank (1, 2, 3...) instead of LVL X
                 if (levelFilter != -1) {
-                    // Specific Level View: "1 | Agent : 6"
                     scoreList.add(rank + " | " + name + " : " + score);
                 } else {
-                    // Global View: "1 | Agent : 6 (Lvl 2)"
                     scoreList.add(rank + " | " + name + " : " + score + " (Lvl " + lvl + ")");
                 }
-                rank++; // Increment rank
+                rank++;
             } while (cursor.moveToNext());
         }
 
@@ -92,9 +106,17 @@ public class DBHelper extends SQLiteOpenHelper {
         return scoreList;
     }
 
+    /**
+     * Determines if a given score qualifies for the Top 25.
+     *
+     * @param score The score achieved by the player.
+     * @param level The level context.
+     * @return True if the table has fewer than 25 entries OR the score beats the 25th lowest score.
+     */
     public boolean isTop25(int score, int level) {
         SQLiteDatabase db = this.getReadableDatabase();
 
+        // 1. Check current count of rows
         String countQuery = "SELECT count(*) FROM " + TABLE_SCORES + " WHERE " + KEY_LEVEL + "=" + level;
         Cursor cursor = db.rawQuery(countQuery, null);
         cursor.moveToFirst();
@@ -102,9 +124,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
         if (count < 25) {
             cursor.close();
-            return true;
+            return true; // Auto-qualify if list isn't full
         }
 
+        // 2. If full, find the score of the 25th person
         String minQuery = "SELECT " + KEY_SCORE + " FROM " + TABLE_SCORES + " WHERE " + KEY_LEVEL + "=" + level + " ORDER BY " + KEY_SCORE + " DESC LIMIT 1 OFFSET 24";
         Cursor minCursor = db.rawQuery(minQuery, null);
 
@@ -112,6 +135,7 @@ public class DBHelper extends SQLiteOpenHelper {
             int lowestTopScore = minCursor.getInt(0);
             minCursor.close();
             cursor.close();
+            // Qualify if we beat the lowest score on the board
             return score > lowestTopScore;
         }
 

@@ -9,6 +9,13 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * Displayed when a level is completed (timer runs out).
+ * This activity:
+ * 1. Shows the score summary.
+ * 2. Determines if the user can proceed to the next level.
+ * 3. Checks if the final score qualifies for the Top 25 leaderboard.
+ */
 public class GameOverActivity extends AppCompatActivity {
 
     private int finishedLevel;
@@ -19,46 +26,45 @@ public class GameOverActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_over);
 
-        // Get Data
+        // Retrieve score and level data from the ended game session.
         finishedLevel = getIntent().getIntExtra("FINISHED_LEVEL", 1);
         int levelScore = getIntent().getIntExtra("LEVEL_SCORE", 0);
         totalScore = getIntent().getIntExtra("TOTAL_SCORE", 0);
 
-        // Setup UI
         TextView tvTitle = findViewById(R.id.tvGameOverTitle);
         TextView tvSub = findViewById(R.id.tvGameOverSub);
 
-        // Change title: "LEVEL 1 COMPLETE"
         tvTitle.setText("LEVEL " + finishedLevel + " COMPLETE");
         tvSub.setText("TOTAL SCORE: " + totalScore + "\n(+" + levelScore + " this level)");
 
         Button btnEndGame = findViewById(R.id.btnEndGame);
         Button btnNext = findViewById(R.id.btnNextLevel);
 
-        // --- BUTTON LOGIC ---
-
-        // "End Game" Button -> Checks High Score -> Main Menu
         btnEndGame.setOnClickListener(v -> checkHighScoreAndFinish());
 
-        // "Next Level" Button -> Continues Game
+        // Logic to determine if "Next Level" button should be shown.
+        // The game ends after Level 4.
         if (finishedLevel >= 4) {
-            // If Level 4 is done, you CANNOT go next.
             btnNext.setVisibility(View.GONE);
-            btnEndGame.setText("FINISH GAME"); // Rename End button
+            btnEndGame.setText("FINISH GAME");
         } else {
             btnNext.setOnClickListener(v -> {
                 Intent intent = new Intent(GameOverActivity.this, GameActivity.class);
                 intent.putExtra("SELECTED_LEVEL", finishedLevel + 1);
-                intent.putExtra("ACCUMULATED_SCORE", totalScore); // Pass total score forward
+                intent.putExtra("ACCUMULATED_SCORE", totalScore);
                 startActivity(intent);
                 finish();
             });
         }
     }
 
+    /**
+     * Checks the database to see if the user's score qualifies for the Hall of Fame.
+     * If yes, prompts for a name; otherwise, returns to Main Menu.
+     */
     private void checkHighScoreAndFinish() {
         DBHelper db = new DBHelper(this);
-        // Check if Total Score is in Top 25 for the level they finished at
+
         if (db.isTop25(totalScore, finishedLevel)) {
             showSaveDialog(db);
         } else {
@@ -66,10 +72,16 @@ public class GameOverActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Displays a dialog allowing the winner to enter their name.
+     *
+     * @param db The database helper instance to perform the insertion.
+     */
     private void showSaveDialog(DBHelper db) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("NEW HIGH SCORE!");
         builder.setMessage("Enter Name:");
+
         final EditText input = new EditText(this);
         builder.setView(input);
         builder.setCancelable(false);
@@ -78,7 +90,6 @@ public class GameOverActivity extends AppCompatActivity {
             String name = input.getText().toString();
             if (name.isEmpty()) name = "Guest";
 
-            // Save: Name, Total Score, Level Reached
             db.addScore(name, totalScore, finishedLevel);
             goToMainMenu();
         });
@@ -91,5 +102,4 @@ public class GameOverActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-
 }

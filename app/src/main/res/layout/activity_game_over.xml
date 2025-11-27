@@ -49,7 +49,7 @@
         android:textSize="18sp"
         android:layout_marginBottom="24dp"/>
 
-    <!-- Option 2: Cash out / Quit -->
+    <!-- Option 2: Quit -->
     <Button
         android:id="@+id/btnEndGame"
         android:layout_width="match_parent"

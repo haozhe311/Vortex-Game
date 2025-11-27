@@ -23,14 +23,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import java.util.Random;
 
+/**
+ * Handles the core gameplay mechanics.
+ * Responsibilities include:
+ * 1. Generating the grid dynamically based on the current level.
+ * 2. Managing the 5-second countdown timer.
+ * 3. Handling user input (touch events) and determining hits vs. misses.
+ * 4. Playing audio and haptic feedback.
+ */
 public class GameActivity extends AppCompatActivity {
 
     private TextView tvLevel, tvTime, tvScore;
     private GridLayout gameGrid;
 
     private int currentLevel;
-    private int accumulatedScore = 0; // Score from previous levels
-    private int currentLevelScore = 0; // Score earned in THIS level
+    private int accumulatedScore = 0;
+    private int currentLevelScore = 0;
 
     private CountDownTimer timer;
     private int correctViewId = -1;
@@ -48,10 +56,11 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-        // Get data passed from previous activity
+        // Retrieve level and score data passed from the previous activity.
         currentLevel = getIntent().getIntExtra("SELECTED_LEVEL", 1);
         accumulatedScore = getIntent().getIntExtra("ACCUMULATED_SCORE", 0);
 
+        // Pre-fetch colors to avoid repeated resource lookups during gameplay.
         COLOR_CYAN = ContextCompat.getColor(this, R.color.cyber_cyan);
         COLOR_PINK = ContextCompat.getColor(this, R.color.cyber_pink);
         COLOR_TEXT = ContextCompat.getColor(this, R.color.cyber_text);
@@ -66,6 +75,9 @@ public class GameActivity extends AppCompatActivity {
         startLevel();
     }
 
+    /**
+     * Initializes the SoundPool for low-latency audio playback.
+     */
     private void initSoundPool() {
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
@@ -86,20 +98,28 @@ public class GameActivity extends AppCompatActivity {
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     }
 
+    /**
+     * Configures the level environment.
+     * Sets up the grid based on level difficulty and starts the 5-second timer.
+     */
     private void startLevel() {
         tvLevel.setText("LVL: " + currentLevel);
         currentLevelScore = 0;
         updateScoreDisplay();
 
+        // Level 1 = 2x2, Level 2 = 3x3, etc.
         cellsPerSide = currentLevel + 1;
         generateGrid(cellsPerSide);
         highlightRandomCell();
 
         if (timer != null) timer.cancel();
 
+        // 5000ms (5 seconds) timer with 100ms update interval.
         timer = new CountDownTimer(5000, 100) {
             public void onTick(long millisUntilFinished) {
                 tvTime.setText(String.format("T: %.1f", millisUntilFinished / 1000.0));
+
+                // Visual warning: Change text color to PINK when time is running out.
                 if (millisUntilFinished < 2000) {
                     tvTime.setTextColor(COLOR_PINK);
                 } else {
@@ -115,11 +135,16 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void updateScoreDisplay() {
-        // Show Total Score (Previous + Current)
         int total = accumulatedScore + currentLevelScore;
         tvScore.setText("PTS: " + total);
     }
 
+    /**
+     * Dynamically populates the GridLayout with Views.
+     * Calculates cell size to fit within the screen width while maintaining a square aspect ratio.
+     *
+     * @param side The number of cells per row/column.
+     */
     private void generateGrid(int side) {
         gameGrid.removeAllViews();
         gameGrid.setColumnCount(side);
@@ -127,6 +152,8 @@ public class GameActivity extends AppCompatActivity {
 
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         float density = getResources().getDisplayMetrics().density;
+
+        // Calculate dynamic margins and padding to ensure cells fit on screen.
         int marginInPixels = (int) (4 * density);
         int parentPadding = (int) (40 * density);
         int totalMarginSpace = (marginInPixels * 2) * side;
@@ -146,7 +173,12 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Logic for selecting a random View to highlight.
+     * Resets the previous target and applies visual effects to the new target.
+     */
     private void highlightRandomCell() {
+        // Reset previous cell
         if (correctViewId != -1) {
             View prev = findViewById(correctViewId);
             if (prev != null) {
@@ -154,6 +186,8 @@ public class GameActivity extends AppCompatActivity {
                 prev.setRotation(0);
             }
         }
+
+        // Select new random cell
         int totalCells = cellsPerSide * cellsPerSide;
         Random random = new Random();
         correctViewId = random.nextInt(totalCells);
@@ -161,6 +195,8 @@ public class GameActivity extends AppCompatActivity {
         View target = findViewById(correctViewId);
         if (target != null) {
             target.getBackground().setColorFilter(COLOR_CYAN, PorterDuff.Mode.SRC_ATOP);
+
+            // Pop-in animation for visual feedback
             target.setScaleX(0.0f);
             target.setScaleY(0.0f);
             target.animate().scaleX(1.0f).scaleY(1.0f)
@@ -168,12 +204,20 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Processes user taps on the grid.
+     *
+     * @param v The View that was clicked.
+     */
     private void checkHit(View v) {
         if (v.getId() == correctViewId) {
+            // SUCCESS
             currentLevelScore++;
             updateScoreDisplay();
 
             if(soundLoaded) soundPool.play(soundHit, 1, 1, 0, 0, 1);
+
+            // Short, sharp vibration for success
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
             } else { vibrator.vibrate(50); }
@@ -181,11 +225,15 @@ public class GameActivity extends AppCompatActivity {
             v.animate().rotation(360).setDuration(200).start();
             highlightRandomCell();
         } else {
+            // FAILURE
             if(soundLoaded) soundPool.play(soundMiss, 1, 1, 0, 0, 1);
+
+            // Longer vibration for error
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
             } else { vibrator.vibrate(200); }
 
+            // Visual Shake Animation
             Drawable bg = v.getBackground();
             bg.setColorFilter(COLOR_PINK, PorterDuff.Mode.SRC_ATOP);
             ObjectAnimator shake = ObjectAnimator.ofFloat(v, "translationX", 0, 20, -20, 20, -20, 0);
@@ -201,8 +249,11 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Called when the timer runs out.
+     * Transitions to the Game Over screen and unlocks levels if applicable.
+     */
     private void handleGameEnd() {
-        // Unlock Logic
         if (currentLevel < 4) {
             SharedPreferences prefs = getSharedPreferences("GamePrefs", MODE_PRIVATE);
             int currentMax = prefs.getInt("unlocked_level", 1);
@@ -211,7 +262,6 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
-        // Just pass data to GameOverActivity
         Intent intent = new Intent(GameActivity.this, GameOverActivity.class);
         intent.putExtra("FINISHED_LEVEL", currentLevel);
         intent.putExtra("LEVEL_SCORE", currentLevelScore);

@@ -7,7 +7,12 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
+/**
+ * Activity responsible for displaying the High Scores / Hall of Fame.
+ * It uses a ListView to present the data fetched from the SQLite database.
+ */
 public class ScoreActivity extends AppCompatActivity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,19 +23,21 @@ public class ScoreActivity extends AppCompatActivity {
 
         DBHelper db = new DBHelper(this);
 
-        // We passed -1 from MainActivity
+        // Retrieve the filter flag passed from MainActivity.
+        // -1 implies a global view, otherwise it is specific to a level ID.
         int levelFilter = getIntent().getIntExtra("LEVEL_FILTER", -1);
 
-        // Update Subtitle
+        // Set the subtitle text based on the filter context.
         if (levelFilter == -1) {
             tvSub.setText("HALL OF FAME");
         } else {
             tvSub.setText("LEVEL " + levelFilter);
         }
 
-        // Fetch Top 25 (Global Accumulated)
+        // Fetch the list of strings representing the Top 25 scores.
         ArrayList<String> scores = db.getTop25Scores(levelFilter);
 
+        // Bind the data to the ListView using a standard ArrayAdapter.
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 R.layout.item_score,

@@ -7,7 +7,6 @@
     android:padding="16dp"
     android:background="@color/cyber_bg">
 
-    <!-- THE 3D TITLE -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
@@ -27,9 +26,6 @@
 
         android:layout_marginBottom="60dp"/>
 
-    <!-- Styled Buttons -->
-
-    <!-- 1. CHANGED: Text to "Start" -->
     <Button
         android:id="@+id/btnStartGame"
         android:layout_width="240dp"
@@ -52,7 +48,6 @@
         android:typeface="monospace"
         android:layout_marginBottom="24dp"/>
 
-    <!-- 2. CHANGED: Text to "Leaderboard" -->
     <Button
         android:id="@+id/btnHighScores"
         android:layout_width="240dp"

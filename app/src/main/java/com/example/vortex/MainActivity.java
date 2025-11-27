@@ -8,8 +8,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
- * Purpose: Main Entry Point.
- * UPDATED: Leaderboard button goes directly to the Score List.
+ * The entry point for the VORTEX application.
+ * This activity handles the main menu UI and navigation to:
+ * 1. The Game (starting at Level 1).
+ * 2. The Help/Mission dialog.
+ * 3. The Leaderboard/High Scores screen.
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -22,33 +25,40 @@ public class MainActivity extends AppCompatActivity {
         Button btnHelp = findViewById(R.id.btnHelp);
         Button btnScores = findViewById(R.id.btnHighScores);
 
-        // 1. Start Game -> Level 1
+        // Launches the GameActivity, initializing it at Level 1.
         btnStart.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, GameActivity.class);
             intent.putExtra("SELECTED_LEVEL", 1);
             startActivity(intent);
         });
 
-        // 2. Help Dialog
+        // Displays the mission objective/help dialog to the user.
         btnHelp.setOnClickListener(v -> showHelpDialog());
 
-        // 3. Leaderboard -> Direct to ScoreActivity (Global List)
+        // Navigates to the ScoreActivity to view the global leaderboard.
+        // Passing -1 indicates we want to see scores from all levels combined.
         btnScores.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ScoreActivity.class);
-            intent.putExtra("LEVEL_FILTER", -1); // -1 indicates "Show All / Accumulated"
+            intent.putExtra("LEVEL_FILTER", -1);
             startActivity(intent);
         });
     }
 
+    /**
+     * Inflates and displays a custom alert dialog containing the game rules.
+     * The background is set to transparent to accommodate the custom XML shape.
+     */
     private void showHelpDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_mission, null);
         builder.setView(dialogView);
+
         AlertDialog dialog = builder.create();
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
         dialog.show();
+
         Button btnAck = dialogView.findViewById(R.id.btnUnderstood);
         btnAck.setOnClickListener(view -> dialog.dismiss());
     }

@@ -7,7 +7,6 @@
     android:background="@color/cyber_bg">
 
     <!-- Themed Title -->
-    <!-- ADDED: layout_marginTop="32dp" to prevent status bar overlap -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,7 +24,7 @@
         android:shadowDy="8"
         android:shadowRadius="0.1"/>
 
-    <!-- Subtitle for Level (e.g. "LEVEL 2") -->
+    <!-- Subtitle for Level -->
     <TextView
         android:id="@+id/tvLevelSub"
         android:layout_width="match_parent"
