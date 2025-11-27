@@ -92,10 +92,4 @@ public class GameOverActivity extends AppCompatActivity {
         finish();
     }
 
-    @Override
-    public void onBackPressed() {
-        // Pressing back here acts like "End Game" (without saving score if you want, or with saving)
-        // Usually, back just quits. Let's make it go to Main Menu safely.
-        goToMainMenu();
-    }
 }

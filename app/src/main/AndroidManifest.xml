@@ -27,11 +27,8 @@
 
         <activity android:name="com.example.vortex.GameActivity" />
         <activity android:name="com.example.vortex.ScoreActivity" />
-        <activity android:name="com.example.vortex.LevelSelectActivity" />
         <activity android:name="com.example.vortex.GameOverActivity" />
 
-        <!-- NEW: Score Level Select Screen -->
-        <activity android:name="com.example.vortex.ScoreLevelSelectActivity" />
 
     </application>
 
