@@ -14,20 +14,21 @@ public class ScoreActivity extends AppCompatActivity {
         setContentView(R.layout.activity_scores);
 
         ListView listView = findViewById(R.id.listViewScores);
-        TextView tvSub = findViewById(R.id.tvLevelSub); // NEW: Subtitle TextView
+        TextView tvSub = findViewById(R.id.tvLevelSub);
 
         DBHelper db = new DBHelper(this);
 
-        // Get filter from intent (-1 means all, 1 means Level 1, etc.)
+        // We passed -1 from MainActivity
         int levelFilter = getIntent().getIntExtra("LEVEL_FILTER", -1);
 
-        // Update Subtitle based on filter
+        // Update Subtitle
         if (levelFilter == -1) {
-            tvSub.setText("GLOBAL RANKING");
+            tvSub.setText("HALL OF FAME");
         } else {
             tvSub.setText("LEVEL " + levelFilter);
         }
 
+        // Fetch Top 25 (Global Accumulated)
         ArrayList<String> scores = db.getTop25Scores(levelFilter);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(

@@ -17,15 +17,10 @@ import android.os.Vibrator;
 import android.view.View;
 import android.view.animation.CycleInterpolator;
 import android.view.animation.OvershootInterpolator;
-import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-
 import java.util.Random;
 
 public class GameActivity extends AppCompatActivity {
@@ -33,8 +28,10 @@ public class GameActivity extends AppCompatActivity {
     private TextView tvLevel, tvTime, tvScore;
     private GridLayout gameGrid;
 
-    private int currentLevel; // Loaded from Intent
-    private int score = 0;
+    private int currentLevel;
+    private int accumulatedScore = 0; // Score from previous levels
+    private int currentLevelScore = 0; // Score earned in THIS level
+
     private CountDownTimer timer;
     private int correctViewId = -1;
     private int cellsPerSide;
@@ -51,8 +48,9 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-        // --- GET LEVEL FROM INTENT ---
+        // Get data passed from previous activity
         currentLevel = getIntent().getIntExtra("SELECTED_LEVEL", 1);
+        accumulatedScore = getIntent().getIntExtra("ACCUMULATED_SCORE", 0);
 
         COLOR_CYAN = ContextCompat.getColor(this, R.color.cyber_cyan);
         COLOR_PINK = ContextCompat.getColor(this, R.color.cyber_pink);
@@ -90,18 +88,15 @@ public class GameActivity extends AppCompatActivity {
 
     private void startLevel() {
         tvLevel.setText("LVL: " + currentLevel);
-        score = 0;
-        tvScore.setText("PTS: 0");
+        currentLevelScore = 0;
+        updateScoreDisplay();
 
-        // Logic: Lvl 1=2x2, Lvl 2=3x3, Lvl 3=4x4, Lvl 4=5x5
         cellsPerSide = currentLevel + 1;
-
         generateGrid(cellsPerSide);
         highlightRandomCell();
 
         if (timer != null) timer.cancel();
 
-        // 5 Seconds Timer
         timer = new CountDownTimer(5000, 100) {
             public void onTick(long millisUntilFinished) {
                 tvTime.setText(String.format("T: %.1f", millisUntilFinished / 1000.0));
@@ -117,6 +112,12 @@ public class GameActivity extends AppCompatActivity {
                 handleGameEnd();
             }
         }.start();
+    }
+
+    private void updateScoreDisplay() {
+        // Show Total Score (Previous + Current)
+        int total = accumulatedScore + currentLevelScore;
+        tvScore.setText("PTS: " + total);
     }
 
     private void generateGrid(int side) {
@@ -169,12 +170,14 @@ public class GameActivity extends AppCompatActivity {
 
     private void checkHit(View v) {
         if (v.getId() == correctViewId) {
-            score++;
-            tvScore.setText("PTS: " + score);
+            currentLevelScore++;
+            updateScoreDisplay();
+
             if(soundLoaded) soundPool.play(soundHit, 1, 1, 0, 0, 1);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
             } else { vibrator.vibrate(50); }
+
             v.animate().rotation(360).setDuration(200).start();
             highlightRandomCell();
         } else {
@@ -182,6 +185,7 @@ public class GameActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
             } else { vibrator.vibrate(200); }
+
             Drawable bg = v.getBackground();
             bg.setColorFilter(COLOR_PINK, PorterDuff.Mode.SRC_ATOP);
             ObjectAnimator shake = ObjectAnimator.ofFloat(v, "translationX", 0, 20, -20, 20, -20, 0);
@@ -197,11 +201,8 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Logic: Check High Score -> Then Go to Game Over Screen
-     */
     private void handleGameEnd() {
-        // Unlock Next Level Logic
+        // Unlock Logic
         if (currentLevel < 4) {
             SharedPreferences prefs = getSharedPreferences("GamePrefs", MODE_PRIVATE);
             int currentMax = prefs.getInt("unlocked_level", 1);
@@ -210,40 +211,13 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
-        DBHelper db = new DBHelper(this);
-        // Check if score is Top 25 for THIS specific level
-        if (db.isTop25(score, currentLevel)) {
-            showSaveDialog(db);
-        } else {
-            goToGameOverScreen();
-        }
-    }
-
-    private void showSaveDialog(DBHelper db) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("NEW HIGH SCORE!");
-        builder.setMessage("Enter Name:");
-        final EditText input = new EditText(this);
-        builder.setView(input);
-        builder.setCancelable(false);
-
-        builder.setPositiveButton("SUBMIT", (dialog, which) -> {
-            String name = input.getText().toString();
-            // --- UPDATED HERE: Default name is now "Guest" ---
-            if (name.isEmpty()) name = "Guest";
-
-            db.addScore(name, score, currentLevel); // Save with Level
-            goToGameOverScreen();
-        });
-        builder.show();
-    }
-
-    private void goToGameOverScreen() {
+        // Just pass data to GameOverActivity
         Intent intent = new Intent(GameActivity.this, GameOverActivity.class);
         intent.putExtra("FINISHED_LEVEL", currentLevel);
-        intent.putExtra("FINAL_SCORE", score);
+        intent.putExtra("LEVEL_SCORE", currentLevelScore);
+        intent.putExtra("TOTAL_SCORE", accumulatedScore + currentLevelScore);
         startActivity(intent);
-        finish(); // Close GameActivity
+        finish();
     }
 
     @Override

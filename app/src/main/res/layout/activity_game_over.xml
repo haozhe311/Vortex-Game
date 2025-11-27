@@ -7,66 +7,36 @@
     android:background="@color/cyber_bg"
     android:padding="24dp">
 
+    <!-- Title changes dynamically in Java (e.g. "LEVEL 1 COMPLETE") -->
     <TextView
         android:id="@+id/tvGameOverTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="GAME OVER"
-        android:textSize="48sp"
+        android:text="LEVEL COMPLETE"
+        android:textSize="36sp"
         android:textStyle="bold"
         android:textColor="@color/cyber_cyan"
         android:typeface="monospace"
+        android:gravity="center"
         android:shadowColor="@color/cyber_pink"
         android:shadowDx="10"
         android:shadowDy="10"
         android:shadowRadius="0.1"
         android:layout_marginBottom="16dp"/>
 
+    <!-- Score Info -->
     <TextView
         android:id="@+id/tvGameOverSub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="LEVEL COMPLETE"
+        android:text="SCORE: 0"
         android:gravity="center"
-        android:textSize="20sp"
+        android:textSize="22sp"
         android:textColor="@color/cyber_text"
         android:typeface="monospace"
-        android:layout_marginBottom="32dp"/>
+        android:layout_marginBottom="48dp"/>
 
-    <!-- NEW: Main Menu Button -->
-    <Button
-        android:id="@+id/btnMainMenu"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="MAIN MENU"
-        android:backgroundTint="@color/cyber_pink"
-        android:textColor="@color/white"
-        android:typeface="monospace"
-        android:textSize="18sp"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/btnLeaderboard"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="LEADERBOARD"
-        android:backgroundTint="@color/cyber_inactive"
-        android:textColor="@color/white"
-        android:typeface="monospace"
-        android:textSize="18sp"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/btnRetry"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="RETRY LEVEL"
-        android:backgroundTint="@color/cyber_inactive"
-        android:textColor="@color/white"
-        android:typeface="monospace"
-        android:textSize="18sp"
-        android:layout_marginBottom="16dp"/>
-
+    <!-- Option 1: Continue to next level -->
     <Button
         android:id="@+id/btnNextLevel"
         android:layout_width="match_parent"
@@ -75,6 +45,18 @@
         android:backgroundTint="@color/cyber_cyan"
         android:textColor="#000000"
         android:textStyle="bold"
+        android:typeface="monospace"
+        android:textSize="18sp"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Option 2: Cash out / Quit -->
+    <Button
+        android:id="@+id/btnEndGame"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="END THE GAME"
+        android:backgroundTint="@color/cyber_pink"
+        android:textColor="@color/white"
         android:typeface="monospace"
         android:textSize="18sp"/>
 

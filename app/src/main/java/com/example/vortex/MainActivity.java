@@ -8,7 +8,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
- * Purpose: Main Entry Point. Navigates to Level Select.
+ * Purpose: Main Entry Point.
+ * UPDATED: Leaderboard button goes directly to the Score List.
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -21,18 +22,20 @@ public class MainActivity extends AppCompatActivity {
         Button btnHelp = findViewById(R.id.btnHelp);
         Button btnScores = findViewById(R.id.btnHighScores);
 
-        // 1. Start Game -> Level Select
+        // 1. Start Game -> Level 1
         btnStart.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, LevelSelectActivity.class);
+            Intent intent = new Intent(MainActivity.this, GameActivity.class);
+            intent.putExtra("SELECTED_LEVEL", 1);
             startActivity(intent);
         });
 
         // 2. Help Dialog
         btnHelp.setOnClickListener(v -> showHelpDialog());
 
-        // 3. Top 25 Scores -> UPDATED: Score Level Select
+        // 3. Leaderboard -> Direct to ScoreActivity (Global List)
         btnScores.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ScoreLevelSelectActivity.class);
+            Intent intent = new Intent(MainActivity.this, ScoreActivity.class);
+            intent.putExtra("LEVEL_FILTER", -1); // -1 indicates "Show All / Accumulated"
             startActivity(intent);
         });
     }
